@@ -2,18 +2,21 @@ import type { NextPage } from "next";
 import CanvasDraw from "react-canvas-draw";
 import { DeleteOutlined, FileSearchOutlined } from "@ant-design/icons";
 import { useEffect, useRef, useState } from "react";
-import { Button, Spin } from "antd";
+import { Button, message, Modal, Spin, Typography } from "antd";
+import dynamic from "next/dynamic";
 
 import { useWindowResize } from "../hooks/window-resize";
 import { base64ToPng } from "../utils/converters";
-import dynamic from "next/dynamic";
+import { ImageRecognitionSerivces } from "../api/services";
 
 const Layout = dynamic(() => import("../components/common/layout"));
 
+const { Text } = Typography;
 const Home: NextPage = () => {
   const { width } = useWindowResize();
   const canvasRef = useRef<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const imgRecServices = new ImageRecognitionSerivces();
 
   useEffect(() => {
     clearCanvas();
@@ -27,11 +30,34 @@ const Home: NextPage = () => {
 
   const handleConversion = async () => {
     if (canvasRef.current) {
+      setIsLoading(true);
+
       const base64Image = canvasRef.current.getDataURL();
       const imgFile = await base64ToPng(base64Image);
-      console.log(imgFile);
+      convertImgToWord(imgFile);
     }
   };
+
+  const convertImgToWord = async (img: File) => {
+    const formData = new FormData();
+    formData.append("images", img);
+    try {
+      const resp = await imgRecServices.recognizeImage(formData);
+      if (resp && resp.status === 200) {
+        message.success("Succefully converted.", 4);
+        Modal.info({
+          title: "Converted Text",
+          okText: "Ok",
+          content: <Text code>{JSON.stringify(resp.data, null, 2)}</Text>,
+        });
+      }
+    } catch (err: any) {
+      message.error(err.message || "Failed to convert.", 4);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Layout>
       <div className="w-full p-2 flex flex-col items-center">
@@ -56,6 +82,7 @@ const Home: NextPage = () => {
             size="large"
             onClick={clearCanvas}
             disabled={isLoading}
+            danger
           >
             Clear Canvas{" "}
           </Button>

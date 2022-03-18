@@ -19,7 +19,7 @@ const Navbar = () => {
               Bangla OCR
             </h3>
             <h5 className="text-sm text-teal-700">
-              An Optical character recognition tool for Bangla language
+              An optical character recognition tool for Bangla language
             </h5>
           </div>
 
@@ -29,12 +29,6 @@ const Navbar = () => {
             </a>
             <a href="" className="text-teal-700">
               About
-            </a>
-            <a href="" className="text-teal-700">
-              Blogs
-            </a>
-            <a href="" className="text-teal-700">
-              Our Team
             </a>
             <a href="" className="text-teal-700">
               Contact Us
